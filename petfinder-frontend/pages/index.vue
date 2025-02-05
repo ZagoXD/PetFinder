@@ -61,6 +61,16 @@
         <p v-if="error" class="error-message">{{ error }}</p>
       </form>
     </div>
+
+    <div v-if="step === 3" class="qr-code-container">
+      <h2>Animal Cadastrado com Sucesso!</h2>
+      <p>Baixe o QR Code do animal abaixo:</p>
+      
+      <img :src="qrCodeUrl" alt="QR Code do Animal" class="qr-code" />
+
+      <button @click="downloadQRCode">Baixar QR Code</button>
+      <button @click="resetForm">Novo Cadastro</button>
+    </div>
   </div>
 </template>
 
@@ -70,7 +80,6 @@ import axios from "axios";
 import { useRouter } from "vue-router";
 import { detectAnimal, loadModel } from "@/utils/tensorflow";
 import loadingGif from "@/assets/teste.gif";
-
 
 const router = useRouter();
 const step = ref(1);
@@ -86,6 +95,7 @@ const loading = ref(false);
 const message = ref("");
 const error = ref("");
 const buttonText = ref("Continuar");
+const qrCodeUrl = ref("");
 
 onMounted(async () => {
   await loadModel();
@@ -148,19 +158,45 @@ const submitAnimal = async () => {
     formData.append("phone", animal.value.phone);
     formData.append("photo", file.value);
 
-    await axios.post("http://127.0.0.1:8000/api/animals/", formData, {
+    const response = await axios.post("http://127.0.0.1:8000/api/animals/", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
     message.value = "Animal cadastrado com sucesso!";
-    router.push("/animals");
+
+    qrCodeUrl.value = response.data.qr_code;
+
+    step.value = 3;
   } catch (err) {
     error.value = "Erro ao cadastrar o animal. Tente novamente.";
   } finally {
     loading.value = false;
   }
 };
+
+const downloadQRCode = () => {
+  const link = document.createElement("a");
+  link.href = qrCodeUrl.value;
+  link.download = "qrcode_animal.png";
+  link.click();
+};
+
+const resetForm = () => {
+  window.location.reload();
+};
 </script>
+
+<style scoped>
+.qr-code-container {
+  text-align: center;
+}
+
+.qr-code {
+  margin: 20px auto;
+  width: 200px;
+  height: 200px;
+}
+</style>
 
 <style scoped>
 .container {
@@ -215,6 +251,7 @@ input:focus, select:focus {
 button {
   width: 100%;
   padding: 12px;
+  margin: 10px;
   background: #28a745;
   color: white;
   font-size: 16px;
