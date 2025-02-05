@@ -3,15 +3,26 @@
     <h1>Cadastrar Animal</h1>
 
     <div v-if="step === 1">
-      <form @submit.prevent="proceedToNextStep">
+      <form @submit.prevent="validateAnimalImage">
         <div class="form-group">
           <label for="photo">Foto do Animal:</label>
           <input type="file" @change="handleFileUpload" id="photo" required />
         </div>
 
-        <button type="submit" :disabled="!file">
-          Continuar
+        <div class="preview-container" v-if="previewImage">
+          <p><strong>Pré-visualização:</strong></p>
+          <img :src="previewImage" alt="Pré-visualização da foto" />
+        </div>
+
+        <button type="submit" :disabled="!file || loading">
+          {{ buttonText }}
+          <img v-if="loading || buttonText === 'Verificando...' || buttonText === 'Uau! Que pet fofo'" 
+              :src="loadingGif" 
+              alt="Loading..." 
+              class="loading-icon" />
         </button>
+
+        <p v-if="error" class="error-message">{{ error }}</p>
       </form>
     </div>
 
@@ -41,13 +52,9 @@
           <input v-model="animal.phone" type="tel" id="phone" required />
         </div>
 
-        <div class="form-group preview">
-          <p><strong>Pré-visualização da Foto:</strong></p>
-          <img :src="previewImage" alt="Pré-visualização da foto" v-if="previewImage" width="150" />
-        </div>
-
         <button type="submit" :disabled="loading">
           {{ loading ? "Cadastrando..." : "Cadastrar Animal" }}
+          <img v-if="loading" :src="loadingGif" alt="Loading..." class="loading-icon" />
         </button>
 
         <p v-if="message" class="success-message">{{ message }}</p>
@@ -58,9 +65,12 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
+import { detectAnimal, loadModel } from "@/utils/tensorflow";
+import loadingGif from "@/assets/teste.gif";
+
 
 const router = useRouter();
 const step = ref(1);
@@ -75,19 +85,53 @@ const previewImage = ref("");
 const loading = ref(false);
 const message = ref("");
 const error = ref("");
+const buttonText = ref("Continuar");
+
+onMounted(async () => {
+  await loadModel();
+});
 
 const handleFileUpload = (event) => {
   const selectedFile = event.target.files[0];
-
   if (selectedFile) {
     file.value = selectedFile;
     previewImage.value = URL.createObjectURL(selectedFile);
   }
 };
 
-const proceedToNextStep = () => {
-  if (file.value) {
-    step.value = 2;
+const validateAnimalImage = async () => {
+  if (!file.value) {
+    error.value = "Selecione uma foto antes de continuar.";
+    return;
+  }
+
+  loading.value = true;
+  buttonText.value = "Verificando...";
+  error.value = "";
+
+  try {
+    const imgElement = new Image();
+    imgElement.src = previewImage.value;
+
+    imgElement.onload = async () => {
+      const isAnimal = await detectAnimal(imgElement);
+
+      if (isAnimal) {
+        buttonText.value = "Uau! Que pet fofo";
+        setTimeout(() => {
+          step.value = 2; 
+        }, 2000); 
+      } else {
+        error.value = "A imagem não parece ser de um animal.";
+        buttonText.value = "Continuar"; 
+      }
+    };
+  } catch (err) {
+    console.error(err);
+    error.value = "Erro ao verificar a imagem. Tente novamente.";
+    buttonText.value = "Continuar"; 
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -102,15 +146,14 @@ const submitAnimal = async () => {
     formData.append("owner", animal.value.owner);
     formData.append("species", animal.value.species);
     formData.append("phone", animal.value.phone);
-    formData.append("photo", file.value); 
+    formData.append("photo", file.value);
 
     await axios.post("http://127.0.0.1:8000/api/animals/", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
     });
 
     message.value = "Animal cadastrado com sucesso!";
+    router.push("/animals");
   } catch (err) {
     error.value = "Erro ao cadastrar o animal. Tente novamente.";
   } finally {
@@ -124,62 +167,94 @@ const submitAnimal = async () => {
   max-width: 500px;
   margin: auto;
   padding: 20px;
-  border: 1px solid #ddd;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  font-family: "Arial", sans-serif;
+  text-align: center;
+}
+
+.loading-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
 }
 
 h1 {
-  text-align: center;
+  color: #333;
   margin-bottom: 20px;
 }
 
 .form-group {
   margin-bottom: 15px;
+  text-align: left;
 }
 
 label {
   display: block;
   font-weight: bold;
   margin-bottom: 5px;
+  color: #444;
 }
 
 input, select {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 5px;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+input:focus, select:focus {
+  border-color: #007bff;
+  outline: none;
 }
 
 button {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   background: #28a745;
   color: white;
+  font-size: 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background: #218838;
+  transform: scale(1.05);
 }
 
 button:disabled {
   background: #ccc;
-}
-
-.preview img {
-  margin-top: 10px;
-  border-radius: 8px;
+  cursor: not-allowed;
 }
 
 .success-message {
   color: green;
-  text-align: center;
+  font-weight: bold;
   margin-top: 10px;
 }
 
 .error-message {
   color: red;
-  text-align: center;
+  font-weight: bold;
   margin-top: 10px;
+}
+
+.preview-container {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.preview-container img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 </style>
