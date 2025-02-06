@@ -158,7 +158,7 @@ const submitAnimal = async () => {
     formData.append("phone", animal.value.phone);
     formData.append("photo", file.value);
 
-    const response = await axios.post("http://127.0.0.1:8000/api/animals/", formData, {
+    const response = await axios.post("http://localhost:8000/api/animals/", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
