@@ -1,10 +1,14 @@
 <template>
-  <div v-if="validToken" class="container">
-    <h1>{{ animal.name }}</h1>
-    <p><strong>Espécie:</strong> {{ animal.species }}</p>
-    <p><strong>Dono:</strong> {{ animal.owner }}</p>
-    <p><strong>Telefone:</strong> {{ animal.phone }}</p>
-    <img :src="animal.photo" alt="Foto do Animal" class="animal-photo" />
+  <div v-if="loading" class="loading-container">
+    <p>Carregando...</p>
+  </div>
+
+  <div v-else-if="validToken" class="container">
+    <h1>{{ animal?.name }}</h1>
+    <p><strong>Espécie:</strong> {{ animal?.species }}</p>
+    <p><strong>Dono:</strong> {{ animal?.owner }}</p>
+    <p><strong>Telefone:</strong> {{ animal?.phone }}</p>
+    <img :src="animal?.photo" alt="Foto do Animal" class="animal-photo" />
   </div>
 
   <div v-else class="error-container">
@@ -16,11 +20,14 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import axios from "axios";
+import { useAnimalStore } from "@/store/animals";
 
 const route = useRoute();
+const store = useAnimalStore();
+
 const animal = ref(null);
 const validToken = ref(false);
+const loading = ref(true);
 
 onMounted(async () => {
   const animalId = route.params.id;
@@ -28,20 +35,15 @@ onMounted(async () => {
 
   if (!token) {
     validToken.value = false;
+    loading.value = false;
     return;
   }
 
-  try {
-    const response = await axios.get(`http://127.0.0.1:8000/api/animals/${animalId}/`);
-    if (response.data.access_token === token) {
-      animal.value = response.data;
-      validToken.value = true;
-    } else {
-      validToken.value = false;
-    }
-  } catch (error) {
-    validToken.value = false;
-  }
+  const { animal: fetchedAnimal, validToken: isValid } = await store.fetchAnimalById(animalId, token);
+
+  animal.value = fetchedAnimal;
+  validToken.value = isValid;
+  loading.value = false;
 });
 </script>
 
@@ -54,6 +56,14 @@ onMounted(async () => {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   background: #fff;
+}
+
+.loading-container {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #555;
+  margin-top: 50px;
 }
 
 .animal-photo {

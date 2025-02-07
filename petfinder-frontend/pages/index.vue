@@ -75,31 +75,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import axios from "axios";
+import { ref, computed } from "vue";
+import { useAnimalStore } from "@/store/animals";
 import { useRouter } from "vue-router";
 import { detectAnimal, loadModel } from "@/utils/tensorflow";
 import loadingGif from "@/assets/teste.gif";
 
+const store = useAnimalStore();
 const router = useRouter();
 const step = ref(1);
+const file = ref(null);
+const previewImage = ref("");
+const buttonText = ref("Continuar");
+
 const animal = ref({
   name: "",
   owner: "",
   species: "",
   phone: "",
 });
-const file = ref(null);
-const previewImage = ref("");
-const loading = ref(false);
-const message = ref("");
-const error = ref("");
-const buttonText = ref("Continuar");
-const qrCodeUrl = ref("");
 
-onMounted(async () => {
-  await loadModel();
-});
+const loading = computed(() => store.loading);
+const message = computed(() => store.message);
+const error = computed(() => store.error);
+const qrCodeUrl = computed(() => store.qrCodeUrl);
 
 const handleFileUpload = (event) => {
   const selectedFile = event.target.files[0];
@@ -111,13 +110,13 @@ const handleFileUpload = (event) => {
 
 const validateAnimalImage = async () => {
   if (!file.value) {
-    error.value = "Selecione uma foto antes de continuar.";
+    store.error = "Selecione uma foto antes de continuar.";
     return;
   }
 
-  loading.value = true;
+  store.loading = true;
   buttonText.value = "Verificando...";
-  error.value = "";
+  store.error = "";
 
   try {
     const imgElement = new Image();
@@ -129,48 +128,25 @@ const validateAnimalImage = async () => {
       if (isAnimal) {
         buttonText.value = "Uau! Que pet fofo";
         setTimeout(() => {
-          step.value = 2; 
-        }, 2000); 
+          step.value = 2;
+        }, 2000);
       } else {
-        error.value = "A imagem não parece ser de um animal.";
-        buttonText.value = "Continuar"; 
+        store.error = "A imagem não parece ser de um animal.";
+        buttonText.value = "Continuar";
       }
     };
   } catch (err) {
-    console.error(err);
-    error.value = "Erro ao verificar a imagem. Tente novamente.";
-    buttonText.value = "Continuar"; 
+    store.error = "Erro ao verificar a imagem. Tente novamente.";
+    buttonText.value = "Continuar";
   } finally {
-    loading.value = false;
+    store.loading = false;
   }
 };
 
 const submitAnimal = async () => {
-  loading.value = true;
-  message.value = "";
-  error.value = "";
-
-  try {
-    const formData = new FormData();
-    formData.append("name", animal.value.name);
-    formData.append("owner", animal.value.owner);
-    formData.append("species", animal.value.species);
-    formData.append("phone", animal.value.phone);
-    formData.append("photo", file.value);
-
-    const response = await axios.post("http://localhost:8000/api/animals/", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-
-    message.value = "Animal cadastrado com sucesso!";
-
-    qrCodeUrl.value = response.data.qr_code;
-
+  await store.submitAnimal(animal.value, file.value);
+  if (!store.error) {
     step.value = 3;
-  } catch (err) {
-    error.value = "Erro ao cadastrar o animal. Tente novamente.";
-  } finally {
-    loading.value = false;
   }
 };
 
