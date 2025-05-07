@@ -6,7 +6,7 @@
         <div class="nav-flex">
           <div class="nav-logo">
             <a href="#" class="logo-link" @click.prevent="scrollToTop">
-              <i class="fas fa-paw logo-icon"></i>
+              <font-awesome-icon :icon="['fas', 'paw']" class="logo-icon" />
               <span class="logo-text">Petfinder</span>
             </a>
           </div>
@@ -17,12 +17,12 @@
           </div>
           <div class="mobile-menu-button">
             <button @click="toggleMenu" class="menu-btn">
-              <i class="fas fa-bars menu-icon"></i>
+              <font-awesome-icon :icon="['fas', 'bars']" class="menu-icon" />
             </button>
           </div>
         </div>
       </div>
-      <!-- Mobile menu -->
+
       <div class="mobile-menu" :class="{ 'mobile-menu-open': menuOpen }">
         <ul class="mobile-menu-list">
           <li><a href="#features" class="mobile-menu-link" @click.prevent="scrollToSection('features')">Recursos</a>
@@ -35,13 +35,12 @@
       </div>
     </nav>
 
-    <!-- Navbar movel -->
     <nav class="navbar scrolled-navbar" :class="{ 'visible-nav': scrolled }">
       <div class="nav-container">
         <div class="nav-flex">
           <div class="nav-logo">
             <a href="#" class="logo-link" @click.prevent="scrollToTop">
-              <i class="fas fa-paw logo-icon"></i>
+              <font-awesome-icon :icon="['fas', 'paw']" class="logo-icon" />
               <span class="logo-text">Petfinder</span>
             </a>
           </div>
@@ -52,12 +51,12 @@
           </div>
           <div class="mobile-menu-button">
             <button @click="toggleMenu" class="menu-btn">
-              <i class="fas fa-bars menu-icon"></i>
+              <font-awesome-icon :icon="['fas', 'bars']" class="menu-icon" />
             </button>
           </div>
         </div>
       </div>
-      <!-- Mobile menu -->
+
       <div class="mobile-menu" :class="{ 'mobile-menu-open': menuOpen }">
         <ul class="mobile-menu-list">
           <li><a href="#features" class="mobile-menu-link" @click.prevent="scrollToSection('features')">Recursos</a>
@@ -70,7 +69,6 @@
       </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="hero-section">
       <div class="hero-container">
         <div class="hero-content">
@@ -87,14 +85,13 @@
       </div>
     </section>
 
-    <!-- Features Section -->
     <section id="features" class="features-section">
       <div class="features-container">
         <h2 class="section-title">Recursos do Petfinder</h2>
         <div class="features-grid">
           <div class="feature-card">
             <div class="feature-icon">
-              <i class="fas fa-qrcode"></i>
+              <font-awesome-icon :icon="['fas', 'qrcode']" class="menu-icon" />
             </div>
             <h3 class="feature-title">QR Code Único</h3>
             <p class="feature-text">Cada pet recebe um QR Code exclusivo que contém todas as informações importantes.
@@ -102,14 +99,14 @@
           </div>
           <div class="feature-card">
             <div class="feature-icon">
-              <i class="fas fa-mobile-alt"></i>
+              <font-awesome-icon :icon="['fas', 'mobile-alt']" />
             </div>
             <h3 class="feature-title">Notificação Instantânea</h3>
             <p class="feature-text">Receba uma notificação imediata quando alguém escanear o QR Code do seu pet.</p>
           </div>
           <div class="feature-card">
             <div class="feature-icon">
-              <i class="fas fa-shield-alt"></i>
+              <font-awesome-icon :icon="['fas', 'shield-alt']" />
             </div>
             <h3 class="feature-title">Segurança</h3>
             <p class="feature-text">Suas informações pessoais são protegidas e só são reveladas quando você desejar.</p>
@@ -118,7 +115,6 @@
       </div>
     </section>
 
-    <!-- How It Works Section -->
     <section id="how-it-works" class="how-it-works-section">
       <div class="how-it-works-container">
         <h2 class="section-title">Como funciona</h2>
@@ -154,7 +150,6 @@
       </div>
     </section>
 
-    <!-- Testimonials Section -->
     <section id="testimonials" class="testimonials-section">
       <div class="testimonials-container">
         <h2 class="section-title">O que dizem sobre nós</h2>
@@ -196,23 +191,21 @@
       </div>
     </section>
 
-    <!-- CTA Section -->
     <section class="cta-section">
       <div class="cta-container">
         <h2 class="cta-title">Proteja seu pet hoje mesmo!</h2>
         <p class="cta-text">Cadastre seu animal de estimação e tenha a tranquilidade de saber que ele sempre poderá
           voltar para casa.</p>
-        <button @click="showModal = true" class="cta-button">Começar agora</button>
+        <button @click="navigateToRegister" class="cta-button">Começar agora</button>
       </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
       <div class="footer-container">
         <div class="footer-content">
           <div class="footer-logo">
             <a href="#" class="footer-logo-link">
-              <i class="fas fa-paw footer-logo-icon"></i>
+              <font-awesome-icon :icon="['fas', 'paw']" class="footer-logo-icon" />
               <span class="footer-logo-text">Petfinder</span>
             </a>
           </div>
@@ -279,7 +272,6 @@ const scrollToTop = () => {
 </script>
 
 <style>
-/* Estilos base */
 .fixed-navbar {
   position: fixed;
   top: 0;
@@ -302,7 +294,6 @@ const scrollToTop = () => {
   transform: translateY(-100%);
 }
 
-/* Navbar ao scrollar */
 .scrolled-navbar {
   position: fixed;
   top: 0;
@@ -321,13 +312,10 @@ const scrollToTop = () => {
   transform: translateY(0);
 }
 
-/* Compensar o espaço da navbar fixa */
 .content-wrapper {
   padding-top: 70px;
-  /* Ajuste conforme a altura da sua navbar */
 }
 
-/* Animações para o scroll suave */
 html {
   scroll-behavior: smooth;
 }
@@ -338,12 +326,10 @@ html {
   }
 }
 
-/* Estilo adicional para a navbar fixa */
 .navbar {
   transition: all 0.3s ease;
 }
 
-/* Efeito de scroll na navbar (opcional) */
 .scrolled-nav {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   background-color: rgba(255, 255, 255, 0.98);
@@ -355,7 +341,6 @@ html {
   color: #333;
 }
 
-/* Navbar */
 .navbar {
   background-color: white;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -470,7 +455,6 @@ html {
   color: white;
 }
 
-/* Hero Section */
 .hero-section {
   background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
   color: white;
@@ -568,7 +552,6 @@ html {
   }
 }
 
-/* Features Section */
 .features-section {
   padding: 5rem 0;
   background-color: #f9fafb;
@@ -630,7 +613,6 @@ html {
   color: #6b7280;
 }
 
-/* How It Works Section */
 .how-it-works-section {
   padding: 5rem 0;
 }
@@ -691,6 +673,8 @@ html {
 
 .step {
   display: flex;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 2rem;
 }
 
@@ -723,7 +707,6 @@ html {
   margin-top: 0.5rem;
 }
 
-/* Testimonials Section */
 .testimonials-section {
   padding: 5rem 0;
   background-color: #f9fafb;
@@ -782,7 +765,6 @@ html {
   font-style: italic;
 }
 
-/* CTA Section */
 .cta-section {
   background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
   color: white;
@@ -826,7 +808,6 @@ html {
   background-color: #f3f4f6;
 }
 
-/* Footer */
 .footer {
   background-color: #1f2937;
   color: white;
@@ -884,7 +865,6 @@ html {
   font-size: 0.875rem;
 }
 
-/* Transições */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s;
